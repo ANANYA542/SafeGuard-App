@@ -3,8 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native'
 import AnimatedGradient from '../components/AnimatedGradient'
 import { Ionicons } from '@expo/vector-icons'
 import AsyncStorage from '@react-native-async-storage/async-storage'
-
-const API = 'http://localhost:4000'
+import { API_BASE } from '../utils/api'
 
 export default function Profile({ navigation }) {
   const [name, setName] = useState('')
@@ -15,7 +14,7 @@ export default function Profile({ navigation }) {
     const token = await AsyncStorage.getItem('@sg_token')
     if (!token) { navigation.replace('Login'); return }
     try {
-      const res = await fetch(`${API}/api/users/me`, { headers: { Authorization: `Bearer ${token}` } })
+      const res = await fetch(`${API_BASE}/api/users/me`, { headers: { Authorization: `Bearer ${token}` } })
       const data = await res.json()
       if (res.ok) { setName(data.name || 'User'); setEmail(data.email || '') } else { navigation.replace('Login') }
     } catch { navigation.replace('Login') }

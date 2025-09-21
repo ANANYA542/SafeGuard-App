@@ -14,8 +14,7 @@ import SimpleLineChart from "../components/SimpleLineChart";
 import { Accelerometer, Gyroscope } from "expo-sensors";
 import * as Location from "expo-location";
 import { Audio } from "expo-av";
-import { startSensors, stopSensors } from "../services/SensorService";
-import { getCooldownRemaining } from "../utils/sos";
+import { getCooldownRemaining, triggerSOS } from "../utils/sos";
 
 export default function SafetyMonitor({ navigation }) {
   const [accEnabled, setAccEnabled] = useState(true);
@@ -27,12 +26,33 @@ export default function SafetyMonitor({ navigation }) {
   const accSub = useRef(null);
   const gyroSub = useRef(null);
   const micTimer = useRef(null);
+  const impactAt = useRef(0);
+  const stillStart = useRef(0);
+  const lastMicTime = useRef(0);
+  const lastMicAmp = useRef(0);
 
   useEffect(() => {
     if (accEnabled && !accSub.current) {
       Accelerometer.setUpdateInterval(200);
       accSub.current = Accelerometer.addListener(({ x, y, z }) => {
-        setAccData((prev) => [...prev.slice(-49), { x, y, z, t: Date.now() }]);
+        const t = Date.now();
+        const g = Math.sqrt(x * x + y * y + z * z);
+        setAccData((prev) => [...prev.slice(-49), { x, y, z, t }]);
+        if (g > 18) {
+          impactAt.current = t;
+          stillStart.current = 0;
+        } else if (impactAt.current && t - impactAt.current <= 4000) {
+          if (g < 1.5) {
+            if (!stillStart.current) stillStart.current = t;
+            if (t - stillStart.current >= 3000) {
+              impactAt.current = 0;
+              stillStart.current = 0;
+              if (getCooldownRemaining() <= 0) triggerSOS("accident");
+            }
+          } else {
+            stillStart.current = 0;
+          }
+        }
       });
     }
     if (!accEnabled && accSub.current) {
@@ -45,7 +65,16 @@ export default function SafetyMonitor({ navigation }) {
     if (gyroEnabled && !gyroSub.current) {
       Gyroscope.setUpdateInterval(200);
       gyroSub.current = Gyroscope.addListener(({ x, y, z }) => {
-        setGyroData((prev) => [...prev.slice(-49), { x, y, z, t: Date.now() }]);
+        const t = Date.now();
+        const m = Math.sqrt(x * x + y * y + z * z);
+        setGyroData((prev) => [...prev.slice(-49), { x, y, z, t }]);
+        if (
+          m > 6.0 &&
+          lastMicAmp.current > 0.65 &&
+          t - lastMicTime.current <= 800
+        ) {
+          if (getCooldownRemaining() <= 0) triggerSOS("attack");
+        }
       });
     }
     if (!gyroEnabled && gyroSub.current) {
@@ -78,6 +107,10 @@ export default function SafetyMonitor({ navigation }) {
                 ...prev.slice(-49),
                 { v, t: Date.now() },
               ]);
+              if (v > 0.65) {
+                lastMicAmp.current = v;
+                lastMicTime.current = Date.now();
+              }
             } catch {}
           }, 400);
           rec._meteringInterval = micTimer.current;

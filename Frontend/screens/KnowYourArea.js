@@ -1,15 +1,18 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { View, Text, StyleSheet, Dimensions, TouchableOpacity } from 'react-native'
 import MapView, { Marker } from 'react-native-maps'
 import AnimatedGradient from '../components/AnimatedGradient'
 import { MotiView } from 'moti'
 import { Ionicons } from '@expo/vector-icons'
+import * as Location from 'expo-location'
+import { triggerSOS } from '../utils/sos'
 
 const { height } = Dimensions.get('window')
 
 export default function KnowYourArea({ navigation }) {
   const [selected, setSelected] = useState(null)
-  const region = { latitude: 28.6139, longitude: 77.209, latitudeDelta: 0.05, longitudeDelta: 0.05 }
+  const [region, setRegion] = useState({ latitude: 28.6139, longitude: 77.209, latitudeDelta: 0.05, longitudeDelta: 0.05 })
+  useEffect(() => { (async () => { try { await Location.requestForegroundPermissionsAsync(); const p = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced }); setRegion(r => ({ ...r, latitude: p.coords.latitude, longitude: p.coords.longitude })) } catch {} })() }, [])
   const incidents = [
     { id: 1, lat: 28.61, lng: 77.21, type: 'Accident', time: '10:32' },
     { id: 2, lat: 28.62, lng: 77.22, type: 'SOS', time: '11:05' },
@@ -22,7 +25,7 @@ export default function KnowYourArea({ navigation }) {
         <Text style={styles.headerTitle}>Know Your Area</Text>
         <View style={styles.iconBtn} />
       </View>
-      <MapView style={styles.map} initialRegion={region}>
+      <MapView style={styles.map} initialRegion={region} showsUserLocation>
         {incidents.map(m => (
           <Marker key={m.id} coordinate={{ latitude: m.lat, longitude: m.lng }} onPress={() => setSelected(m)}>
             <View style={[styles.pin, { backgroundColor: m.type === 'SOS' ? '#EB5757' : m.type === 'Attack' ? '#F2C94C' : '#2F80ED' }]} />
@@ -34,6 +37,7 @@ export default function KnowYourArea({ navigation }) {
           <Text style={styles.cardTitle}>{selected.type}</Text>
           <Text style={styles.cardText}>Timestamp {selected.time}</Text>
           <Text style={styles.cardText}>Lat {selected.lat.toFixed(3)} Lng {selected.lng.toFixed(3)}</Text>
+          <TouchableOpacity onPress={() => triggerSOS('sos')} style={{ marginTop: 10 }}><Text style={{ color: '#2F80ED', fontWeight: '700' }}>Trigger SOS</Text></TouchableOpacity>
         </MotiView>
       )}
     </AnimatedGradient>

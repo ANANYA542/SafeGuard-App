@@ -3,8 +3,7 @@ import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert } from 'reac
 import AnimatedGradient from '../components/AnimatedGradient'
 import { Ionicons } from '@expo/vector-icons'
 import AsyncStorage from '@react-native-async-storage/async-storage'
-
-const API = 'http://localhost:4000'
+import { API_BASE } from '../utils/api'
 
 export default function Login({ navigation }) {
   const [email, setEmail] = useState('')
@@ -14,7 +13,7 @@ export default function Login({ navigation }) {
     if (!email || !password) return
     setLoading(true)
     try {
-      const res = await fetch(`${API}/api/auth/login`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, password }) })
+      const res = await fetch(`${API_BASE}/api/auth/login`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, password }) })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'error')
       await AsyncStorage.setItem('@sg_token', data.token)
