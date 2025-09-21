@@ -1,16 +1,39 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { View, Text, StyleSheet, Switch, Dimensions, TouchableOpacity } from 'react-native'
 import AnimatedGradient from '../components/AnimatedGradient'
 import SafetyScoreCircle from '../components/SafetyScoreCircle'
 import { MotiView } from 'moti'
 import { Ionicons } from '@expo/vector-icons'
 import PressOnButton from '../components/PressonButton'
+import AsyncStorage from '@react-native-async-storage/async-storage'
+import { API_BASE } from '../utils/api'
 
 const { width } = Dimensions.get('window')
 
 export default function Home({ navigation }) {
   const [monitoring, setMonitoring] = useState(false)
   const [alertVisible, setAlertVisible] = useState(true)
+  const [userName, setUserName] = useState('User')
+
+  useEffect(() => {
+    async function fetchUser() {
+      try {
+        const token = await AsyncStorage.getItem('@sg_token')
+        if (!token) return
+        const res = await fetch(`${API_BASE}/api/users/me`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        })
+        if (res.ok) {
+          const data = await res.json()
+          setUserName(data.name || 'User')
+        }
+      } catch (e) {
+        console.log('Failed to fetch user:', e)
+      }
+    }
+    fetchUser()
+  }, [])
+
   return (
     <AnimatedGradient>
       <View style={styles.headerRow}>
@@ -18,7 +41,7 @@ export default function Home({ navigation }) {
           <Ionicons name="person-circle-outline" size={32} color="#fff" />
         </TouchableOpacity>
         <View style={{ flex: 1 }}>
-          <Text style={styles.headerTitle}>Stay Safe, Alex</Text>
+          <Text style={styles.headerTitle}>Stay Safe, {userName}</Text>
         </View>
         <TouchableOpacity onPress={() => navigation.navigate('Settings')} style={styles.iconBtn}>
           <Ionicons name="notifications-outline" size={22} color="#fff" />
@@ -79,17 +102,9 @@ export default function Home({ navigation }) {
           <Ionicons name="call-outline" size={20} color="#98A2B3" />
           <Text style={styles.navText}>Contacts</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('Login')}>
-          <Ionicons name="log-in-outline" size={20} color="#98A2B3" />
-          <Text style={styles.navText}>Login</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('Signup')}>
-          <Ionicons name="person-add-outline" size={20} color="#98A2B3" />
-          <Text style={styles.navText}>Sign Up</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('Settings')}>
-          <Ionicons name="settings-outline" size={20} color="#98A2B3" />
-          <Text style={styles.navText}>Settings</Text>
+        <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('Profile')}>
+          <Ionicons name="person-outline" size={20} color="#98A2B3" />
+          <Text style={styles.navText}>Profile</Text>
         </TouchableOpacity>
       </View>
       <PressOnButton label="SOS" bottom={90} onPress={() => navigation.navigate('SOS')} />

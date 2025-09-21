@@ -25,6 +25,8 @@ import LoginScreen from "../screens/Login";
 import SignupScreen from "../screens/Signup";
 import FAQsScreen from "../screens/FAQs";
 import ProfileScreen from "../screens/Profile";
+import EditProfileScreen from "../screens/EditProfile";
+import ChangePasswordScreen from "../screens/ChangePassword";
 import { Ionicons } from "@expo/vector-icons";
 
 const Drawer = createDrawerNavigator();
@@ -93,6 +95,9 @@ function MainStack() {
       <Stack.Screen name="Contacts" component={ContactsScreen} />
       <Stack.Screen name="Login" component={LoginScreen} />
       <Stack.Screen name="Signup" component={SignupScreen} />
+      <Stack.Screen name="Profile" component={ProfileScreen} />
+      <Stack.Screen name="EditProfile" component={EditProfileScreen} />
+      <Stack.Screen name="ChangePassword" component={ChangePasswordScreen} />
       <Stack.Screen name="QuickActions" component={BottomTabs} />
     </Stack.Navigator>
   );
@@ -106,7 +111,6 @@ export default function RootNavigator() {
         <Drawer.Screen name="Main" component={MainStack} />
         <Drawer.Screen name="KnowYourArea" component={KnowYourAreaScreen} />
         <Drawer.Screen name="FAQs" component={FAQsScreen} />
-        <Drawer.Screen name="Profile" component={ProfileScreen} />
       </Drawer.Navigator>
     </NavigationContainer>
   );

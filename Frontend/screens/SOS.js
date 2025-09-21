@@ -25,12 +25,33 @@ export default function SOS({ navigation }) {
     return () => clearTimeout(t)
   }, [armed, countdown, sosSent])
 
-  async function triggerAlert() {
+  async function playFakeCallSound() {
     setActionTaken(true)
-    Vibration.vibrate([500, 500, 1000])
-    const s = await Audio.Sound.createAsync(require('../assets/splash-icon.png'))
-    setSound(s.sound)
-    await s.sound.playAsync()
+    Vibration.vibrate([200, 100, 200])
+    try {
+      const { sound } = await Audio.Sound.createAsync(
+        { uri: 'data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiTYIGGi77eeeTRAMUKfj8LZjHAY4ktfyzHksBSR3x/DdkEAKFF606+uoVRQKRp/g8r5sIQUrgs7y2Yk2CBhpvO3nnk0QDFC' },
+        { shouldPlay: true }
+      )
+      setTimeout(() => sound.unloadAsync(), 2000)
+    } catch (e) { console.log('Audio error:', e) }
+  }
+
+  async function playSirenSound() {
+    setActionTaken(true)
+    Vibration.vibrate([500, 500, 500, 500])
+    try {
+      const { sound } = await Audio.Sound.createAsync(
+        { uri: 'data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiTYIGGi77eeeTRAMUKfj8LZjHAY4ktfyzHksBSR3x/DdkEAKFF606+uoVRQKRp/g8r5sIQUrgs7y2Yk2CBhpvO3nnk0QDFC' },
+        { shouldPlay: true, isLooping: true }
+      )
+      setTimeout(() => sound.unloadAsync(), 3000)
+    } catch (e) { console.log('Audio error:', e) }
+  }
+
+  async function playAlarmSound() {
+    setActionTaken(true)
+    navigation.navigate('Alarm', { autoStart: true })
   }
 
   function onSOSSent() {
@@ -58,8 +79,22 @@ export default function SOS({ navigation }) {
         {(armed || sosSent) && <View style={styles.badge}><Text style={styles.badgeText}>Armed</Text></View>}
       </View>
       <View style={styles.center}>
-        <MotiView from={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: 'timing', duration: 300 }} style={styles.panicWrap}>
-          <TouchableOpacity activeOpacity={0.9} onPress={() => { setArmed(true); setCountdown(5) }} style={styles.panic}>
+        <MotiView 
+          from={{ scale: 0.95, opacity: 0 }} 
+          animate={{ scale: 1, opacity: 1 }} 
+          transition={{ type: 'timing', duration: 300 }} 
+          style={styles.panicWrap}
+          pointerEvents="box-none"
+        >
+          <TouchableOpacity 
+            activeOpacity={0.9} 
+            onPress={() => { 
+              console.log('SOS button pressed!');
+              setArmed(true); 
+              setCountdown(5);
+            }} 
+            style={styles.panic}
+          >
             <Text style={styles.panicText}>SOS</Text>
           </TouchableOpacity>
         </MotiView>
@@ -72,9 +107,9 @@ export default function SOS({ navigation }) {
         <TouchableOpacity onPress={() => { setArmed(false); setCountdown(5); navigation.navigate('Home') }}><Text style={styles.cancel}>Cancel</Text></TouchableOpacity>
         <View style={styles.actionsBar}>
           <TouchableOpacity onPress={toggleTorch} style={styles.actionItem}><Ionicons name="flashlight" size={18} color="#fff" /><Text style={styles.actionLabel}>Flashlight</Text></TouchableOpacity>
-          <TouchableOpacity onPress={triggerAlert} style={styles.actionItem}><Ionicons name="call" size={18} color="#fff" /><Text style={styles.actionLabel}>Fake Call</Text></TouchableOpacity>
-          <TouchableOpacity onPress={triggerAlert} style={styles.actionItem}><Ionicons name="megaphone" size={18} color="#fff" /><Text style={styles.actionLabel}>Siren</Text></TouchableOpacity>
-          <TouchableOpacity onPress={() => navigation.navigate('Alarm', { autoStart: true })} style={styles.actionItem}><Ionicons name="alarm" size={18} color="#fff" /><Text style={styles.actionLabel}>Alarm</Text></TouchableOpacity>
+          <TouchableOpacity onPress={playFakeCallSound} style={styles.actionItem}><Ionicons name="call" size={18} color="#fff" /><Text style={styles.actionLabel}>Fake Call</Text></TouchableOpacity>
+          <TouchableOpacity onPress={playSirenSound} style={styles.actionItem}><Ionicons name="megaphone" size={18} color="#fff" /><Text style={styles.actionLabel}>Siren</Text></TouchableOpacity>
+          <TouchableOpacity onPress={playAlarmSound} style={styles.actionItem}><Ionicons name="alarm" size={18} color="#fff" /><Text style={styles.actionLabel}>Alarm</Text></TouchableOpacity>
         </View>
       </View>
       {permission?.granted && (

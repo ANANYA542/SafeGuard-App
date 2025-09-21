@@ -13,20 +13,23 @@ export default function Contacts({ navigation }) {
   const [newPhone, setNewPhone] = useState('')
   const [newRelation, setNewRelation] = useState('')
 
+
   useEffect(() => { loadContacts() }, [])
   async function loadContacts() {
     try {
-      const json = await AsyncStorage.getItem('@sg_contacts')
-      if (json) setContacts(JSON.parse(json))
-      else {
-        const defaults = [
-          { id: 'sample-1', name: 'Sarah Connor', phone: '9999999999', relation: 'Mother' },
-          { id: 'sample-2', name: 'John Miller', phone: '8888888888', relation: 'Friend' },
-          { id: 'sample-3', name: 'Dr. Evelyn Reed', phone: '7777777777', relation: 'Doctor' }
-        ]
-        setContacts(defaults)
-        await AsyncStorage.setItem('@sg_contacts', JSON.stringify(defaults))
-      }
+      // Force reset to load new emergency contacts
+      const defaults = [
+        { id: 'emergency-1', name: 'Police', phone: '100', relation: 'Emergency' },
+        { id: 'emergency-2', name: 'Ambulance', phone: '102', relation: 'Emergency' },
+        { id: 'emergency-3', name: 'Fire Brigade', phone: '101', relation: 'Emergency' },
+        { id: 'emergency-4', name: 'Women Helpline', phone: '1091', relation: 'Emergency' },
+        { id: 'emergency-5', name: 'Child Helpline', phone: '1098', relation: 'Emergency' },
+        { id: 'sample-1', name: 'Sarah Connor', phone: '9999999999', relation: 'Mother' },
+        { id: 'sample-2', name: 'John Miller', phone: '8888888888', relation: 'Friend' },
+        { id: 'sample-3', name: 'Dr. Evelyn Reed', phone: '7777777777', relation: 'Doctor' }
+      ]
+      setContacts(defaults)
+      await AsyncStorage.setItem('@sg_contacts', JSON.stringify(defaults))
     } catch {}
   }
   async function saveContacts(next) {

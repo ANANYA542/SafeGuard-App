@@ -138,7 +138,11 @@ export default function SafetyMonitor({ navigation }) {
   const active = accEnabled || gyroEnabled || micEnabled;
   return (
     <AnimatedGradient>
-      <ScrollView contentContainerStyle={{ paddingBottom: 24 }}>
+      <ScrollView 
+        contentContainerStyle={{ paddingBottom: 24 }} 
+        showsVerticalScrollIndicator={true}
+        bounces={true}
+      >
         <View style={styles.headerRow}>
           <TouchableOpacity
             style={styles.iconBtn}

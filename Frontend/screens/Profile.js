@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native'
+import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native'
 import AnimatedGradient from '../components/AnimatedGradient'
 import { Ionicons } from '@expo/vector-icons'
 import AsyncStorage from '@react-native-async-storage/async-storage'
@@ -42,8 +42,8 @@ export default function Profile({ navigation }) {
         <Text style={styles.summarySub}>Based on your recent activity and saved contacts.</Text>
       </View>
       <Text style={styles.sectionLabel}>ACCOUNT</Text>
-      <TouchableOpacity style={styles.linkRow}><View style={styles.rowLeft}><Ionicons name="person-circle-outline" size={18} color="#fff" /><Text style={styles.rowTitle}>Edit Profile</Text></View><Ionicons name="chevron-forward" size={16} color="#98A2B3" /></TouchableOpacity>
-      <TouchableOpacity style={styles.linkRow}><View style={styles.rowLeft}><Ionicons name="lock-closed-outline" size={18} color="#fff" /><Text style={styles.rowTitle}>Change Password</Text></View><Ionicons name="chevron-forward" size={16} color="#98A2B3" /></TouchableOpacity>
+      <TouchableOpacity style={styles.linkRow} onPress={() => navigation.navigate('EditProfile')}><View style={styles.rowLeft}><Ionicons name="person-circle-outline" size={18} color="#fff" /><Text style={styles.rowTitle}>Edit Profile</Text></View><Ionicons name="chevron-forward" size={16} color="#98A2B3" /></TouchableOpacity>
+      <TouchableOpacity style={styles.linkRow} onPress={() => navigation.navigate('ChangePassword')}><View style={styles.rowLeft}><Ionicons name="lock-closed-outline" size={18} color="#fff" /><Text style={styles.rowTitle}>Change Password</Text></View><Ionicons name="chevron-forward" size={16} color="#98A2B3" /></TouchableOpacity>
       <Text style={styles.sectionLabel}>ACTIVITY</Text>
       <TouchableOpacity style={styles.linkRow} onPress={() => navigation.navigate('Contacts')}><View style={styles.rowLeft}><Ionicons name="shield-outline" size={18} color="#fff" /><Text style={styles.rowTitle}>Manage Emergency Contacts</Text></View><Ionicons name="chevron-forward" size={16} color="#98A2B3" /></TouchableOpacity>
       <TouchableOpacity style={styles.linkRow} onPress={() => navigation.navigate('DailyReports')}><View style={styles.rowLeft}><Ionicons name="time-outline" size={18} color="#fff" /><Text style={styles.rowTitle}>Activity History</Text></View><Ionicons name="chevron-forward" size={16} color="#98A2B3" /></TouchableOpacity>

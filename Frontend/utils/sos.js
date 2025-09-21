@@ -1,8 +1,8 @@
 import { Linking } from 'react-native'
 import * as Location from 'expo-location'
+import { API_BASE } from './api'
 
 const SOS_NUMBERS = ['+911234567890', '+91111222333']
-const API = 'http://localhost:4000'
 let cooldownUntil = 0
 
 export async function triggerSOS(type) {
@@ -27,7 +27,7 @@ export async function triggerSOS(type) {
     } catch {}
 
     try {
-      await fetch(`${API}/api/incidents`, {
+      await fetch(`${API_BASE}/api/sos`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ type, latitude, longitude, address, time })

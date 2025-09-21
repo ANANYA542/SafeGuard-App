@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react'
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native'
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Modal } from 'react-native'
 import AnimatedGradient from '../components/AnimatedGradient'
 import { Ionicons } from '@expo/vector-icons'
 import SimpleLineChart from '../components/SimpleLineChart'
@@ -13,16 +13,28 @@ const incidents = [
 
 export default function DailyReports({ navigation }) {
   const [filter, setFilter] = useState('All')
+  const [calendarVisible, setCalendarVisible] = useState(false)
+  const [selectedDate, setSelectedDate] = useState(new Date())
   const filtered = incidents.filter(d => filter === 'All' || d.type === filter)
   const weekly = useMemo(() => Array.from({ length: 7 }).map((_, i) => ({ y: Math.max(1, Math.random() * 9) })), [])
   const bars = [{ label: 'Accident', color: '#56CCF2', height: 60 }, { label: 'Attack', color: '#F2C94C', height: 32 }, { label: 'SOS', color: '#EB5757', height: 80 }]
+  
+  const formatDate = (date) => {
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+    return `${months[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`
+  }
+
   return (
     <AnimatedGradient>
-      <ScrollView contentContainerStyle={{ paddingBottom: 24 }}>
+      <ScrollView 
+        contentContainerStyle={{ paddingBottom: 24 }}
+        showsVerticalScrollIndicator={true}
+        bounces={true}
+      >
         <View style={styles.headerRow}>
           <TouchableOpacity style={styles.iconBtn} onPress={() => navigation.goBack()}><Ionicons name="chevron-back" size={22} color="#fff" /></TouchableOpacity>
           <Text style={styles.headerTitle}>Daily Reports</Text>
-          <TouchableOpacity style={styles.iconBtn}><Ionicons name="calendar-outline" size={20} color="#fff" /></TouchableOpacity>
+          <TouchableOpacity style={styles.iconBtn} onPress={() => setCalendarVisible(true)}><Ionicons name="calendar-outline" size={20} color="#fff" /></TouchableOpacity>
         </View>
         <View style={styles.filters}>
           {['All', 'Accident', 'Attack', 'SOS'].map(f => (
@@ -75,6 +87,42 @@ export default function DailyReports({ navigation }) {
           </View>
         ))}
       </ScrollView>
+      
+      <Modal transparent visible={calendarVisible} animationType="fade">
+        <View style={styles.modalOverlay}>
+          <View style={styles.calendarModal}>
+            <Text style={styles.modalTitle}>Select Date</Text>
+            <Text style={styles.selectedDateText}>{formatDate(selectedDate)}</Text>
+            <View style={styles.quickDateButtons}>
+              <TouchableOpacity style={styles.quickBtn} onPress={() => setSelectedDate(new Date())}>
+                <Text style={styles.quickBtnText}>Today</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.quickBtn} onPress={() => {
+                const yesterday = new Date();
+                yesterday.setDate(yesterday.getDate() - 1);
+                setSelectedDate(yesterday);
+              }}>
+                <Text style={styles.quickBtnText}>Yesterday</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.quickBtn} onPress={() => {
+                const lastWeek = new Date();
+                lastWeek.setDate(lastWeek.getDate() - 7);
+                setSelectedDate(lastWeek);
+              }}>
+                <Text style={styles.quickBtnText}>Last Week</Text>
+              </TouchableOpacity>
+            </View>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 20 }}>
+              <TouchableOpacity style={[styles.modalBtn, { backgroundColor: 'rgba(255,255,255,0.12)' }]} onPress={() => setCalendarVisible(false)}>
+                <Text style={styles.modalBtnText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={[styles.modalBtn, { backgroundColor: '#2F80ED' }]} onPress={() => setCalendarVisible(false)}>
+                <Text style={styles.modalBtnText}>Apply</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </AnimatedGradient>
   )
 }
@@ -99,5 +147,14 @@ const styles = StyleSheet.create({
   incidentItem: { marginHorizontal: 16, marginTop: 10, padding: 14, borderRadius: 16, backgroundColor: 'rgba(255,255,255,0.06)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)', flexDirection: 'row', alignItems: 'center' },
   incidentIcon: { width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center', marginRight: 12 },
   incidentTitle: { color: '#fff', fontSize: 14, fontWeight: '700' },
-  incidentSub: { color: '#98A2B3', fontSize: 12, marginTop: 2 }
+  incidentSub: { color: '#98A2B3', fontSize: 12, marginTop: 2 },
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', alignItems: 'center', justifyContent: 'center' },
+  calendarModal: { width: '88%', backgroundColor: 'rgba(20,28,46,0.95)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.12)', borderRadius: 20, padding: 20 },
+  modalTitle: { color: '#fff', fontSize: 18, fontWeight: '700', textAlign: 'center' },
+  selectedDateText: { color: '#56CCF2', fontSize: 16, fontWeight: '600', textAlign: 'center', marginTop: 12 },
+  quickDateButtons: { flexDirection: 'row', justifyContent: 'space-around', marginTop: 20 },
+  quickBtn: { backgroundColor: 'rgba(255,255,255,0.08)', borderRadius: 12, paddingVertical: 10, paddingHorizontal: 16 },
+  quickBtnText: { color: '#fff', fontWeight: '600' },
+  modalBtn: { borderRadius: 12, paddingVertical: 12, paddingHorizontal: 24, flex: 1, marginHorizontal: 6, alignItems: 'center' },
+  modalBtnText: { color: '#fff', fontWeight: '700' }
 })
