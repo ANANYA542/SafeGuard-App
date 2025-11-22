@@ -4,16 +4,16 @@ import { LinearGradient } from "expo-linear-gradient";
 
 const { width } = Dimensions.get("window");
 
-export default function PressOnButton({ onPress }) {
+export default function PressOnButton({ onPress, label = 'SOS', bottom = 90 }) {
   return (
-    <TouchableOpacity style={styles.container} onPress={onPress}>
+    <TouchableOpacity style={[styles.container, { bottom }]} onPress={onPress}>
       <LinearGradient
         colors={["#FF3D00", "#FF6D00"]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={styles.gradient}
       >
-        <Text style={styles.text}>Press On</Text>
+        <Text style={styles.text}>{label}</Text>
       </LinearGradient>
     </TouchableOpacity>
   );
@@ -22,7 +22,6 @@ export default function PressOnButton({ onPress }) {
 const styles = StyleSheet.create({
   container: {
     position: "absolute",
-    bottom: 30,
     alignSelf: "center",
     width: width * 0.25,
     height: width * 0.25,

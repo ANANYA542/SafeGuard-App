@@ -14,6 +14,7 @@ import SOSScreen from '../screens/SOS'
 import AlarmScreen from '../screens/Alarm'
 import LocationScreen from '../screens/Location'
 import SettingsScreen from '../screens/Settings'
+import ContactsScreen from '../screens/Contacts'
 import FAQsScreen from '../screens/FAQs'
 import ProfileScreen from '../screens/Profile'
 import { Ionicons } from '@expo/vector-icons'
@@ -40,7 +41,10 @@ function MainStack() {
       <Stack.Screen name="DailyReports" component={DailyReportsScreen} />
       <Stack.Screen name="NearbyUsers" component={NearbyUsersScreen} />
       <Stack.Screen name="ActivityMonitor" component={ActivityMonitorScreen} />
+      <Stack.Screen name="Alarm" component={AlarmScreen} />
+      <Stack.Screen name="SOS" component={SOSScreen} />
       <Stack.Screen name="Settings" component={SettingsScreen} />
+      <Stack.Screen name="Contacts" component={ContactsScreen} />
       <Stack.Screen name="QuickActions" component={BottomTabs} />
     </Stack.Navigator>
   )

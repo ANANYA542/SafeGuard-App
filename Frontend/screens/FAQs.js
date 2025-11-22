@@ -1,17 +1,26 @@
 import React from 'react'
-import { View, Text, StyleSheet } from 'react-native'
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native'
 import AnimatedGradient from '../components/AnimatedGradient'
+import { Ionicons } from '@expo/vector-icons'
 
-export default function FAQs() {
+export default function FAQs({ navigation }) {
   return (
     <AnimatedGradient>
+      <View style={styles.headerRow}>
+        <TouchableOpacity style={styles.iconBtn} onPress={() => navigation.goBack()}><Ionicons name="chevron-back" size={22} color="#fff" /></TouchableOpacity>
+        <Text style={styles.headerTitle}>FAQs</Text>
+        <View style={styles.iconBtn} />
+      </View>
       <View style={styles.box}><Text style={styles.title}>FAQs</Text><Text style={styles.text}>Tap menu to explore features</Text></View>
     </AnimatedGradient>
   )
 }
 
 const styles = StyleSheet.create({
-  box: { marginTop: 56, backgroundColor: 'rgba(255,255,255,0.8)', margin: 16, borderRadius: 16, padding: 16 },
+  headerRow: { marginTop: 56, paddingHorizontal: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  headerTitle: { color: '#fff', fontSize: 18, fontWeight: '700' },
+  iconBtn: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center' },
+  box: { marginTop: 12, backgroundColor: 'rgba(255,255,255,0.8)', margin: 16, borderRadius: 16, padding: 16 },
   title: { fontSize: 18, fontWeight: '700', color: '#111827' },
   text: { fontSize: 14, color: '#4B5563', marginTop: 8 }
 })

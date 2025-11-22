@@ -4,6 +4,7 @@ import AnimatedGradient from '../components/AnimatedGradient'
 import SafetyScoreCircle from '../components/SafetyScoreCircle'
 import { MotiView } from 'moti'
 import { Ionicons } from '@expo/vector-icons'
+import PressOnButton from '../components/PressonButton'
 
 const { width } = Dimensions.get('window')
 
@@ -74,7 +75,7 @@ export default function Home({ navigation }) {
           <Ionicons name="location-outline" size={20} color="#98A2B3" />
           <Text style={styles.navText}>Map</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('Settings')}>
+        <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('Contacts')}>
           <Ionicons name="call-outline" size={20} color="#98A2B3" />
           <Text style={styles.navText}>Contacts</Text>
         </TouchableOpacity>
@@ -83,6 +84,7 @@ export default function Home({ navigation }) {
           <Text style={styles.navText}>Settings</Text>
         </TouchableOpacity>
       </View>
+      <PressOnButton label="SOS" bottom={90} onPress={() => navigation.navigate('SOS')} />
     </AnimatedGradient>
   )
 }
