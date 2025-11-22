@@ -8,9 +8,9 @@ const { width, height } = Dimensions.get('window');
 export default function VideoScreen({ navigation }) {
   return (
     <View style={styles.container}>
-      {/* Background Video */}
+     
       <Video
-        source={require('../assets/bg1.mov')} // adjust path if needed
+        source={require('../assets/bg1.mov')} 
         style={styles.backgroundVideo}
         resizeMode="cover"
         shouldPlay
@@ -18,7 +18,7 @@ export default function VideoScreen({ navigation }) {
         isMuted
       />
 
-      {/* Rakshak Button */}
+
       <TouchableOpacity
         style={styles.rakshakButton}
         onPress={() => navigation.navigate('Home')}
@@ -27,7 +27,7 @@ export default function VideoScreen({ navigation }) {
         <Text style={styles.buttonText}>Rakshak</Text>
       </TouchableOpacity>
 
-      {/* Press On Panic Button */}
+
       <PressOnButton onPress={() => console.log("Press On button pressed!")} />
     </View>
   );

@@ -22,7 +22,7 @@ export default function AllSafeFeed() {
       const nextIndex = (currentIndex + 1) % safetyFeed.length;
       setCurrentIndex(nextIndex);
       scrollRef.current.scrollTo({ x: nextIndex * width, animated: true });
-    }, 3000); // scroll every 3 seconds
+    }, 3000); 
 
     return () => clearInterval(interval);
   }, [currentIndex]);
