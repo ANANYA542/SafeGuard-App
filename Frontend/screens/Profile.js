@@ -1,12 +1,25 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native'
 import AnimatedGradient from '../components/AnimatedGradient'
 import { Ionicons } from '@expo/vector-icons'
+import AsyncStorage from '@react-native-async-storage/async-storage'
+
+const API = 'http://localhost:4000'
 
 export default function Profile({ navigation }) {
-  const [name, setName] = useState('Chaitanya Varma')
-  const [email, setEmail] = useState('chaitanya@safeguard.app')
+  const [name, setName] = useState('')
+  const [email, setEmail] = useState('')
   const score = 98
+  useEffect(() => { load() }, [])
+  async function load() {
+    const token = await AsyncStorage.getItem('@sg_token')
+    if (!token) { navigation.replace('Login'); return }
+    try {
+      const res = await fetch(`${API}/api/users/me`, { headers: { Authorization: `Bearer ${token}` } })
+      const data = await res.json()
+      if (res.ok) { setName(data.name || 'User'); setEmail(data.email || '') } else { navigation.replace('Login') }
+    } catch { navigation.replace('Login') }
+  }
   return (
     <AnimatedGradient>
       <View style={styles.headerRow}>
@@ -35,7 +48,7 @@ export default function Profile({ navigation }) {
       <Text style={styles.sectionLabel}>ACTIVITY</Text>
       <TouchableOpacity style={styles.linkRow} onPress={() => navigation.navigate('Contacts')}><View style={styles.rowLeft}><Ionicons name="shield-outline" size={18} color="#fff" /><Text style={styles.rowTitle}>Manage Emergency Contacts</Text></View><Ionicons name="chevron-forward" size={16} color="#98A2B3" /></TouchableOpacity>
       <TouchableOpacity style={styles.linkRow} onPress={() => navigation.navigate('DailyReports')}><View style={styles.rowLeft}><Ionicons name="time-outline" size={18} color="#fff" /><Text style={styles.rowTitle}>Activity History</Text></View><Ionicons name="chevron-forward" size={16} color="#98A2B3" /></TouchableOpacity>
-      <TouchableOpacity style={styles.logout}><Ionicons name="log-out-outline" size={18} color="#fff" /><Text style={styles.logoutText}>Logout</Text></TouchableOpacity>
+      <TouchableOpacity style={styles.logout} onPress={async () => { await AsyncStorage.removeItem('@sg_token'); navigation.replace('Login') }}><Ionicons name="log-out-outline" size={18} color="#fff" /><Text style={styles.logoutText}>Logout</Text></TouchableOpacity>
     </AnimatedGradient>
   )
 }

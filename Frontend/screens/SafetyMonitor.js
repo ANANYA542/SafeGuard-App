@@ -11,6 +11,11 @@ import AnimatedGradient from "../components/AnimatedGradient";
 import { MotiView } from "moti";
 import { Ionicons } from "@expo/vector-icons";
 import SimpleLineChart from "../components/SimpleLineChart";
+import { Accelerometer, Gyroscope } from "expo-sensors";
+import * as Location from "expo-location";
+import { Audio } from "expo-av";
+import { startSensors, stopSensors } from "../services/SensorService";
+import { getCooldownRemaining } from "../utils/sos";
 
 export default function SafetyMonitor({ navigation }) {
   const [accEnabled, setAccEnabled] = useState(true);
@@ -19,101 +24,93 @@ export default function SafetyMonitor({ navigation }) {
   const [accData, setAccData] = useState([]);
   const [gyroData, setGyroData] = useState([]);
   const [soundLevel, setSoundLevel] = useState([]);
-  const accTimer = useRef(null);
-  const gyroTimer = useRef(null);
+  const accSub = useRef(null);
+  const gyroSub = useRef(null);
   const micTimer = useRef(null);
 
   useEffect(() => {
-    if (accEnabled && !accTimer.current) {
-      accTimer.current = setInterval(() => {
-        const x = (Math.random() - 0.5) * 2;
-        const y = (Math.random() - 0.5) * 2;
-        const z = (Math.random() - 0.5) * 2;
+    if (accEnabled && !accSub.current) {
+      Accelerometer.setUpdateInterval(200);
+      accSub.current = Accelerometer.addListener(({ x, y, z }) => {
         setAccData((prev) => [...prev.slice(-49), { x, y, z, t: Date.now() }]);
-      }, 400);
+      });
     }
-    if (!accEnabled && accTimer.current) {
-      clearInterval(accTimer.current);
-      accTimer.current = null;
+    if (!accEnabled && accSub.current) {
+      accSub.current.remove();
+      accSub.current = null;
     }
-    return () => {};
   }, [accEnabled]);
 
   useEffect(() => {
-    if (gyroEnabled && !gyroTimer.current) {
-      gyroTimer.current = setInterval(() => {
-        const x = (Math.random() - 0.5) * 4;
-        const y = (Math.random() - 0.5) * 4;
-        const z = (Math.random() - 0.5) * 4;
+    if (gyroEnabled && !gyroSub.current) {
+      Gyroscope.setUpdateInterval(200);
+      gyroSub.current = Gyroscope.addListener(({ x, y, z }) => {
         setGyroData((prev) => [...prev.slice(-49), { x, y, z, t: Date.now() }]);
-      }, 400);
+      });
     }
-    if (!gyroEnabled && gyroTimer.current) {
-      clearInterval(gyroTimer.current);
-      gyroTimer.current = null;
+    if (!gyroEnabled && gyroSub.current) {
+      gyroSub.current.remove();
+      gyroSub.current = null;
     }
-    return () => {};
   }, [gyroEnabled]);
 
   useEffect(() => {
     if (micEnabled && !micTimer.current) {
-      micTimer.current = setInterval(() => {
-        const v = Math.max(0, Math.min(1, Math.random() * 0.8 + 0.2));
-        setSoundLevel((prev) => [...prev.slice(-49), { v, t: Date.now() }]);
-      }, 500);
+      (async () => {
+        try {
+          await Audio.requestPermissionsAsync();
+          await Audio.setAudioModeAsync({
+            allowsRecordingIOS: true,
+            playsInSilentModeIOS: true,
+          });
+          const rec = new Audio.Recording();
+          await rec.prepareToRecordAsync(
+            Audio.RecordingOptionsPresets.HighQuality
+          );
+          await rec.startAsync();
+          micTimer.current = setInterval(async () => {
+            try {
+              const s = await rec.getStatusAsync();
+              const v = s.metering
+                ? Math.min(1, Math.max(0, (s.metering + 160) / 80))
+                : 0;
+              setSoundLevel((prev) => [
+                ...prev.slice(-49),
+                { v, t: Date.now() },
+              ]);
+            } catch {}
+          }, 400);
+          rec._meteringInterval = micTimer.current;
+        } catch {}
+      })();
     }
     if (!micEnabled && micTimer.current) {
       clearInterval(micTimer.current);
       micTimer.current = null;
     }
-    return () => {};
   }, [micEnabled]);
 
   useEffect(() => {
     return () => {
-      if (accTimer.current) clearInterval(accTimer.current);
-      if (gyroTimer.current) clearInterval(gyroTimer.current);
+      if (accSub.current) accSub.current.remove();
+      if (gyroSub.current) gyroSub.current.remove();
       if (micTimer.current) clearInterval(micTimer.current);
     };
   }, []);
 
-  async function startMic() {
-    const perm = await Audio.requestPermissionsAsync();
-    if (!perm.granted) return;
-    const rec = new Audio.Recording();
-    await rec.prepareToRecordAsync(Audio.RecordingOptionsPresets.HighQuality);
-    await rec.startAsync();
-    setRecording(rec);
-    const interval = setInterval(async () => {
-      try {
-        const status = await rec.getStatusAsync();
-        const level = status.metering || Math.random() * 0.5;
-        setSoundLevel((prev) => [
-          ...prev.slice(-49),
-          { v: level, t: Date.now() },
-        ]);
-      } catch {}
-    }, 500);
-    rec._meteringInterval = interval;
-  }
+  async function startMic() {}
 
-  async function stopMic() {
-    if (recording) {
-      try {
-        await recording.stopAndUnloadAsync();
-      } catch {}
-      if (recording._meteringInterval)
-        clearInterval(recording._meteringInterval);
-      setRecording(null);
-    }
-  }
+  async function stopMic() {}
 
   const active = accEnabled || gyroEnabled || micEnabled;
   return (
     <AnimatedGradient>
       <ScrollView contentContainerStyle={{ paddingBottom: 24 }}>
         <View style={styles.headerRow}>
-          <TouchableOpacity style={styles.iconBtn} onPress={() => navigation.goBack()}>
+          <TouchableOpacity
+            style={styles.iconBtn}
+            onPress={() => navigation.goBack()}
+          >
             <Ionicons name="chevron-back" size={22} color="#fff" />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>SafeGuard</Text>
@@ -130,7 +127,9 @@ export default function SafetyMonitor({ navigation }) {
           </Text>
           <Text style={styles.statusSub}>
             {active
-              ? "Your safety is being monitored."
+              ? `Monitoring • Cooldown ${Math.ceil(
+                  getCooldownRemaining() / 1000
+                )}s`
               : "Enable sensors to start monitoring."}
           </Text>
         </View>

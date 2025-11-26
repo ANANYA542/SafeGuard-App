@@ -79,6 +79,14 @@ export default function Home({ navigation }) {
           <Ionicons name="call-outline" size={20} color="#98A2B3" />
           <Text style={styles.navText}>Contacts</Text>
         </TouchableOpacity>
+        <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('Login')}>
+          <Ionicons name="log-in-outline" size={20} color="#98A2B3" />
+          <Text style={styles.navText}>Login</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('Signup')}>
+          <Ionicons name="person-add-outline" size={20} color="#98A2B3" />
+          <Text style={styles.navText}>Sign Up</Text>
+        </TouchableOpacity>
         <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('Settings')}>
           <Ionicons name="settings-outline" size={20} color="#98A2B3" />
           <Text style={styles.navText}>Settings</Text>
